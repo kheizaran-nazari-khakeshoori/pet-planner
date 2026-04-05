@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, time
 from typing import List, Optional
+
+DB_FILE = "pet_planner.db"
 
 @dataclass
 class Pet:
@@ -24,10 +27,66 @@ class Task:
 
 class PetPlanner:
     def __init__(self) -> None:
+        self.db = sqlite3.connect(DB_FILE)
+        self.db.row_factory = sqlite3.Row
+        self._ensure_db()
         self.pets: List[Pet] = []
         self.tasks: List[Task] = []
         self.next_pet_id = 1
         self.next_task_id = 1
+        self._load_data()
+
+    def _ensure_db(self) -> None:
+        cursor = self.db.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS pets (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                age INTEGER
+            )
+            """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY,
+                pet_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                due_time TEXT,
+                frequency TEXT NOT NULL,
+                status TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(pet_id) REFERENCES pets(id)
+            )
+            """
+        )
+        self.db.commit()
+
+    def _load_data(self) -> None:
+        cursor = self.db.cursor()
+        cursor.execute("SELECT id, name, type, age FROM pets")
+        self.pets = [Pet(id=row[0], name=row[1], type=row[2], age=row[3]) for row in cursor.fetchall()]
+        cursor.execute(
+            "SELECT id, pet_id, title, description, due_time, frequency, status, created_at FROM tasks"
+        )
+        self.tasks = [
+            Task(
+                id=row[0],
+                pet_id=row[1],
+                title=row[2],
+                description=row[3] or "",
+                due_time=self._parse_time(row[4]) if row[4] else None,
+                frequency=row[5],
+                status=row[6],
+                created_at=datetime.fromisoformat(row[7]),
+            )
+            for row in cursor.fetchall()
+        ]
+        self.next_pet_id = max((pet.id for pet in self.pets), default=0) + 1
+        self.next_task_id = max((task.id for task in self.tasks), default=0) + 1
 
     def run(self) -> None:
         while True:
@@ -82,9 +141,16 @@ class PetPlanner:
         pet_type = input("Pet type: ").strip()
         age_str = input("Pet age (optional): ").strip()
         age = int(age_str) if age_str.isdigit() else None
-        pet = Pet(id=self.next_pet_id, name=name, type=pet_type, age=age)
+        cursor = self.db.cursor()
+        cursor.execute(
+            "INSERT INTO pets (name, type, age) VALUES (?, ?, ?)",
+            (name, pet_type, age),
+        )
+        self.db.commit()
+        pet_id = cursor.lastrowid
+        pet = Pet(id=pet_id, name=name, type=pet_type, age=age)
         self.pets.append(pet)
-        self.next_pet_id += 1
+        self.next_pet_id = max(self.next_pet_id, pet_id + 1)
         print(f"Added pet [{pet.id}] {pet.name}.")
 
     def _edit_pet(self) -> None:
@@ -95,12 +161,22 @@ class PetPlanner:
         pet.type = input(f"New type ({pet.type}): ").strip() or pet.type
         age_str = input(f"New age ({pet.age if pet.age is not None else 'none'}): ").strip()
         pet.age = int(age_str) if age_str.isdigit() else pet.age
+        cursor = self.db.cursor()
+        cursor.execute(
+            "UPDATE pets SET name = ?, type = ?, age = ? WHERE id = ?",
+            (pet.name, pet.type, pet.age, pet.id),
+        )
+        self.db.commit()
         print(f"Updated pet [{pet.id}] {pet.name}.")
 
     def _delete_pet(self) -> None:
         pet = self._select_pet("delete")
         if pet is None:
             return
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM tasks WHERE pet_id = ?", (pet.id,))
+        cursor.execute("DELETE FROM pets WHERE id = ?", (pet.id,))
+        self.db.commit()
         self.pets.remove(pet)
         self.tasks = [task for task in self.tasks if task.pet_id != pet.id]
         print(f"Deleted pet [{pet.id}] and removed associated tasks.")
@@ -127,16 +203,30 @@ class PetPlanner:
         description = input("Task description: ").strip()
         due_time = self._parse_time(input("Due time (HH:MM) optional: ").strip())
         frequency = input("Frequency [once/daily/weekly/custom]: ").strip() or "once"
+        created_at = datetime.now().isoformat()
+        due_time_str = self._time_to_string(due_time)
+        cursor = self.db.cursor()
+        cursor.execute(
+            """
+            INSERT INTO tasks (pet_id, title, description, due_time, frequency, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (pet.id, title, description, due_time_str, frequency, "pending", created_at),
+        )
+        self.db.commit()
+        task_id = cursor.lastrowid
         task = Task(
-            id=self.next_task_id,
+            id=task_id,
             pet_id=pet.id,
             title=title,
             description=description,
             due_time=due_time,
             frequency=frequency,
+            status="pending",
+            created_at=datetime.fromisoformat(created_at),
         )
         self.tasks.append(task)
-        self.next_task_id += 1
+        self.next_task_id = max(self.next_task_id, task_id + 1)
         print(f"Added task [{task.id}] {task.title} for pet [{pet.id}] {pet.name}.")
 
     def _edit_task(self) -> None:
@@ -145,15 +235,25 @@ class PetPlanner:
             return
         task.title = input(f"New title ({task.title}): ").strip() or task.title
         task.description = input(f"New description ({task.description}): ").strip() or task.description
-        due_time = self._parse_time(input("New due time (HH:MM) leave blank to keep: ").strip())
-        task.due_time = due_time if due_time is not None else task.due_time
+        due_time_input = input("New due time (HH:MM) leave blank to keep: ").strip()
+        due_time = self._parse_time(due_time_input) if due_time_input else task.due_time
+        task.due_time = due_time
         task.frequency = input(f"New frequency ({task.frequency}): ").strip() or task.frequency
+        cursor = self.db.cursor()
+        cursor.execute(
+            "UPDATE tasks SET title = ?, description = ?, due_time = ?, frequency = ? WHERE id = ?",
+            (task.title, task.description, self._time_to_string(task.due_time), task.frequency, task.id),
+        )
+        self.db.commit()
         print(f"Updated task [{task.id}] {task.title}.")
 
     def _delete_task(self) -> None:
         task = self._select_task("delete")
         if task is None:
             return
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM tasks WHERE id = ?", (task.id,))
+        self.db.commit()
         self.tasks.remove(task)
         print(f"Deleted task [{task.id}] {task.title}.")
 
@@ -162,6 +262,9 @@ class PetPlanner:
         if task is None:
             return
         task.status = "completed"
+        cursor = self.db.cursor()
+        cursor.execute("UPDATE tasks SET status = ? WHERE id = ?", (task.status, task.id))
+        self.db.commit()
         print(f"Task [{task.id}] {task.title} marked as completed.")
 
     def _select_pet(self, action: str) -> Optional[Pet]:
@@ -190,7 +293,7 @@ class PetPlanner:
         print("Task not found.")
         return None
 
-    def _parse_time(self, value: str) -> Optional[time]:
+    def _parse_time(self, value: Optional[str]) -> Optional[time]:
         if not value:
             return None
         try:
@@ -198,6 +301,9 @@ class PetPlanner:
         except ValueError:
             print("Invalid time format. Use HH:MM.")
             return None
+
+    def _time_to_string(self, value: Optional[time]) -> Optional[str]:
+        return value.strftime("%H:%M") if value else None
 
 if __name__ == "__main__":
     PetPlanner().run()
