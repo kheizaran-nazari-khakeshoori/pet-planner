@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Pet Planner CLI application with SQLite persistence."""
 from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass, field
