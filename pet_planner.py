@@ -10,6 +10,7 @@ DB_FILE = "pet_planner.db"
 
 @dataclass
 class Pet:
+    """Represents a pet belonging to the user."""
     id: int
     name: str
     type: str
@@ -17,6 +18,7 @@ class Pet:
 
 @dataclass
 class Task:
+    """Represents a scheduled task assigned to a pet."""
     id: int
     pet_id: int
     title: str
