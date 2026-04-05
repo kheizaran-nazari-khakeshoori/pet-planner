@@ -33,15 +33,36 @@ class PetPlanner:
         while True:
             print("\nPet Planner CLI")
             print("1) List pets")
-            print("2) List tasks")
-            print("3) Exit")
+            print("2) Add pet")
+            print("3) Edit pet")
+            print("4) Delete pet")
+            print("5) List tasks")
+            print("6) Add task")
+            print("7) Edit task")
+            print("8) Delete task")
+            print("9) Mark task complete")
+            print("10) Exit")
             choice = input("Choose an option: ").strip()
 
             if choice == "1":
                 self._list_pets()
             elif choice == "2":
-                self._list_tasks()
+                self._add_pet()
             elif choice == "3":
+                self._edit_pet()
+            elif choice == "4":
+                self._delete_pet()
+            elif choice == "5":
+                self._list_tasks()
+            elif choice == "6":
+                self._add_task()
+            elif choice == "7":
+                self._edit_task()
+            elif choice == "8":
+                self._delete_task()
+            elif choice == "9":
+                self._mark_task_complete()
+            elif choice == "10":
                 print("Goodbye!")
                 break
             else:
@@ -53,7 +74,36 @@ class PetPlanner:
             return
         print("\nPets:")
         for pet in self.pets:
-            print(f"- [{pet.id}] {pet.name} ({pet.type})")
+            age_text = f", age {pet.age}" if pet.age is not None else ""
+            print(f"- [{pet.id}] {pet.name} ({pet.type}{age_text})")
+
+    def _add_pet(self) -> None:
+        name = input("Pet name: ").strip()
+        pet_type = input("Pet type: ").strip()
+        age_str = input("Pet age (optional): ").strip()
+        age = int(age_str) if age_str.isdigit() else None
+        pet = Pet(id=self.next_pet_id, name=name, type=pet_type, age=age)
+        self.pets.append(pet)
+        self.next_pet_id += 1
+        print(f"Added pet [{pet.id}] {pet.name}.")
+
+    def _edit_pet(self) -> None:
+        pet = self._select_pet("edit")
+        if pet is None:
+            return
+        pet.name = input(f"New name ({pet.name}): ").strip() or pet.name
+        pet.type = input(f"New type ({pet.type}): ").strip() or pet.type
+        age_str = input(f"New age ({pet.age if pet.age is not None else 'none'}): ").strip()
+        pet.age = int(age_str) if age_str.isdigit() else pet.age
+        print(f"Updated pet [{pet.id}] {pet.name}.")
+
+    def _delete_pet(self) -> None:
+        pet = self._select_pet("delete")
+        if pet is None:
+            return
+        self.pets.remove(pet)
+        self.tasks = [task for task in self.tasks if task.pet_id != pet.id]
+        print(f"Deleted pet [{pet.id}] and removed associated tasks.")
 
     def _list_tasks(self) -> None:
         if not self.tasks:
@@ -61,7 +111,93 @@ class PetPlanner:
             return
         print("\nTasks:")
         for task in self.tasks:
-            print(f"- [{task.id}] {task.title} for pet {task.pet_id} ({task.status})")
+            due_text = task.due_time.strftime("%H:%M") if task.due_time else "No due time"
+            print(
+                f"- [{task.id}] {task.title} for pet {task.pet_id} | {task.frequency} | {due_text} | {task.status}"
+            )
+
+    def _add_task(self) -> None:
+        if not self.pets:
+            print("Add a pet before creating tasks.")
+            return
+        pet = self._select_pet("assign this task to")
+        if pet is None:
+            return
+        title = input("Task title: ").strip()
+        description = input("Task description: ").strip()
+        due_time = self._parse_time(input("Due time (HH:MM) optional: ").strip())
+        frequency = input("Frequency [once/daily/weekly/custom]: ").strip() or "once"
+        task = Task(
+            id=self.next_task_id,
+            pet_id=pet.id,
+            title=title,
+            description=description,
+            due_time=due_time,
+            frequency=frequency,
+        )
+        self.tasks.append(task)
+        self.next_task_id += 1
+        print(f"Added task [{task.id}] {task.title} for pet [{pet.id}] {pet.name}.")
+
+    def _edit_task(self) -> None:
+        task = self._select_task("edit")
+        if task is None:
+            return
+        task.title = input(f"New title ({task.title}): ").strip() or task.title
+        task.description = input(f"New description ({task.description}): ").strip() or task.description
+        due_time = self._parse_time(input("New due time (HH:MM) leave blank to keep: ").strip())
+        task.due_time = due_time if due_time is not None else task.due_time
+        task.frequency = input(f"New frequency ({task.frequency}): ").strip() or task.frequency
+        print(f"Updated task [{task.id}] {task.title}.")
+
+    def _delete_task(self) -> None:
+        task = self._select_task("delete")
+        if task is None:
+            return
+        self.tasks.remove(task)
+        print(f"Deleted task [{task.id}] {task.title}.")
+
+    def _mark_task_complete(self) -> None:
+        task = self._select_task("mark as complete")
+        if task is None:
+            return
+        task.status = "completed"
+        print(f"Task [{task.id}] {task.title} marked as completed.")
+
+    def _select_pet(self, action: str) -> Optional[Pet]:
+        self._list_pets()
+        pet_id_str = input(f"Enter pet ID to {action}: ").strip()
+        if not pet_id_str.isdigit():
+            print("Invalid pet ID.")
+            return None
+        pet_id = int(pet_id_str)
+        for pet in self.pets:
+            if pet.id == pet_id:
+                return pet
+        print("Pet not found.")
+        return None
+
+    def _select_task(self, action: str) -> Optional[Task]:
+        self._list_tasks()
+        task_id_str = input(f"Enter task ID to {action}: ").strip()
+        if not task_id_str.isdigit():
+            print("Invalid task ID.")
+            return None
+        task_id = int(task_id_str)
+        for task in self.tasks:
+            if task.id == task_id:
+                return task
+        print("Task not found.")
+        return None
+
+    def _parse_time(self, value: str) -> Optional[time]:
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, "%H:%M").time()
+        except ValueError:
+            print("Invalid time format. Use HH:MM.")
+            return None
 
 if __name__ == "__main__":
     PetPlanner().run()
