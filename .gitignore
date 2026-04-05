@@ -1,0 +1,78 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.Trashes
+Icon\r
+
+# Editor directories and files
+.vscode/
+.idea/
+*.iml
+*.swp
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.pytest_cache/
+.cache/
+.pytype/
+mypy_cache/
+.dmypy.json
+.pyre/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build / distribution
+dist/
+build/
+out/
+target/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+*.whl
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.tgz
+
+# Temporary files
+*.tmp
+*.temp
+*.orig
+*.bak
+*.rej
