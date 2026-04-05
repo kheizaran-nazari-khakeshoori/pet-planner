@@ -191,8 +191,9 @@ class PetPlanner:
         print("\nTasks:")
         for task in self.tasks:
             due_text = task.due_time.strftime("%H:%M") if task.due_time else "No due time"
+            pet_name = self._get_pet_name(task.pet_id)
             print(
-                f"- [{task.id}] {task.title} for pet {task.pet_id} | {task.frequency} | {due_text} | {task.status}"
+                f"- [{task.id}] {task.title} for pet {pet_name} | {task.frequency} | {due_text} | {task.status}"
             )
 
     def _add_task(self) -> None:
@@ -278,8 +279,9 @@ class PetPlanner:
         print("\nToday's Tasks:")
         for task in today_tasks:
             due_text = task.due_time.strftime("%H:%M") if task.due_time else "No due time"
+            pet_name = self._get_pet_name(task.pet_id)
             print(
-                f"- [{task.id}] {task.title} for pet {task.pet_id} | {task.frequency} | {due_text} | {task.status}"
+                f"- [{task.id}] {task.title} for pet {pet_name} | {task.frequency} | {due_text} | {task.status}"
             )
 
     def _is_task_due_today(self, task: Task) -> bool:
@@ -288,6 +290,12 @@ class PetPlanner:
         if task.frequency in {"daily", "weekly", "custom", "once"}:
             return True
         return False
+
+    def _get_pet_name(self, pet_id: int) -> str:
+        for pet in self.pets:
+            if pet.id == pet_id:
+                return pet.name
+        return f"Unknown({pet_id})"
 
     def _select_pet(self, action: str) -> Optional[Pet]:
         self._list_pets()
