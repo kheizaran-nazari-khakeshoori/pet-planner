@@ -100,7 +100,8 @@ class PetPlanner:
             print("7) Edit task")
             print("8) Delete task")
             print("9) Mark task complete")
-            print("10) Exit")
+            print("10) List today's tasks")
+            print("11) Exit")
             choice = input("Choose an option: ").strip()
 
             if choice == "1":
@@ -122,6 +123,8 @@ class PetPlanner:
             elif choice == "9":
                 self._mark_task_complete()
             elif choice == "10":
+                self._list_today_tasks()
+            elif choice == "11":
                 print("Goodbye!")
                 break
             else:
@@ -266,6 +269,25 @@ class PetPlanner:
         cursor.execute("UPDATE tasks SET status = ? WHERE id = ?", (task.status, task.id))
         self.db.commit()
         print(f"Task [{task.id}] {task.title} marked as completed.")
+
+    def _list_today_tasks(self) -> None:
+        today_tasks = [task for task in self.tasks if self._is_task_due_today(task)]
+        if not today_tasks:
+            print("No tasks due today.")
+            return
+        print("\nToday's Tasks:")
+        for task in today_tasks:
+            due_text = task.due_time.strftime("%H:%M") if task.due_time else "No due time"
+            print(
+                f"- [{task.id}] {task.title} for pet {task.pet_id} | {task.frequency} | {due_text} | {task.status}"
+            )
+
+    def _is_task_due_today(self, task: Task) -> bool:
+        if task.status != "pending":
+            return False
+        if task.frequency in {"daily", "weekly", "custom", "once"}:
+            return True
+        return False
 
     def _select_pet(self, action: str) -> Optional[Pet]:
         self._list_pets()
