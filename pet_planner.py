@@ -30,6 +30,7 @@ class Task:
 
 class PetPlanner:
     def __init__(self) -> None:
+        """Initialize the planner and load data from the database."""
         self.db = sqlite3.connect(DB_FILE)
         self.db.row_factory = sqlite3.Row
         self._ensure_db()
