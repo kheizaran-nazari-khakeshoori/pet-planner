@@ -1,0 +1,2 @@
+# Requirements for Pet Planner CLI
+# Add Flask later if you switch to a web interface.
