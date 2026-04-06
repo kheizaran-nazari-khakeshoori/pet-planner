@@ -247,6 +247,7 @@ class PetPlanner:
         print(f"Added task [{task.id}] {task.title} for pet [{pet.id}] {pet.name}.")
 
     def _edit_task(self) -> None:
+        """Edit the fields of an existing task."""
         task = self._select_task("edit")
         if task is None:
             return
