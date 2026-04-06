@@ -148,6 +148,7 @@ class PetPlanner:
             print(f"- [{pet.id}] {pet.name} ({pet.type}{age_text})")
 
     def _add_pet(self) -> None:
+        """Prompt the user for pet details and save the new pet."""
         name = input("Pet name: ").strip()
         pet_type = input("Pet type: ").strip()
         age_str = input("Pet age (optional): ").strip()
