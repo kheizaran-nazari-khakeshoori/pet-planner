@@ -41,6 +41,7 @@ class PetPlanner:
         self._load_data()
 
     def _ensure_db(self) -> None:
+        """Create database tables if they do not already exist."""
         cursor = self.db.cursor()
         cursor.execute(
             """
