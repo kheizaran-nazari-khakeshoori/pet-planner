@@ -183,6 +183,7 @@ class PetPlanner:
         print(f"Updated pet [{pet.id}] {pet.name}.")
 
     def _delete_pet(self) -> None:
+        """Delete a pet and all tasks associated with that pet."""
         pet = self._select_pet("delete")
         if pet is None:
             return
