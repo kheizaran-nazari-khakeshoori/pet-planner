@@ -166,6 +166,7 @@ class PetPlanner:
         print(f"Added pet [{pet.id}] {pet.name}.")
 
     def _edit_pet(self) -> None:
+        """Edit name, type, or age for an existing pet."""
         pet = self._select_pet("edit")
         if pet is None:
             return
