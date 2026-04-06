@@ -95,6 +95,7 @@ class PetPlanner:
         self.next_task_id = max((task.id for task in self.tasks), default=0) + 1
 
     def run(self) -> None:
+        """Display the main menu and dispatch user input to actions."""
         while True:
             print("\nPet Planner CLI")
             print("1) List pets")
