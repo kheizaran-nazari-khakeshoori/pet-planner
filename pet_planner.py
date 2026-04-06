@@ -138,6 +138,7 @@ class PetPlanner:
                 print("Invalid choice. Please try again.")
 
     def _list_pets(self) -> None:
+        """Show all pets currently stored in the system."""
         if not self.pets:
             print("No pets available.")
             return
