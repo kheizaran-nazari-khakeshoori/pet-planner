@@ -277,6 +277,7 @@ class PetPlanner:
         print(f"Deleted task [{task.id}] {task.title}.")
 
     def _mark_task_complete(self) -> None:
+        """Mark a task status as completed."""
         task = self._select_task("mark as complete")
         if task is None:
             return
