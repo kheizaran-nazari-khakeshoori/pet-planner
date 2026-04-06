@@ -209,6 +209,7 @@ class PetPlanner:
             )
 
     def _add_task(self) -> None:
+        """Prompt the user for task details and save the new task."""
         if not self.pets:
             print("Add a pet before creating tasks.")
             return
