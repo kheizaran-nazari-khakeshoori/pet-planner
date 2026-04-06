@@ -266,6 +266,7 @@ class PetPlanner:
         print(f"Updated task [{task.id}] {task.title}.")
 
     def _delete_task(self) -> None:
+        """Delete a task from the system and remove it from the database."""
         task = self._select_task("delete")
         if task is None:
             return
