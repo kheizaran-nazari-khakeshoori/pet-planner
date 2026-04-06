@@ -71,6 +71,7 @@ class PetPlanner:
         self.db.commit()
 
     def _load_data(self) -> None:
+        """Load pets and tasks from the database into memory."""
         cursor = self.db.cursor()
         cursor.execute("SELECT id, name, type, age FROM pets")
         self.pets = [Pet(id=row[0], name=row[1], type=row[2], age=row[3]) for row in cursor.fetchall()]
