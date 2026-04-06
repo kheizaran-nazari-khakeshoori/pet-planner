@@ -196,6 +196,7 @@ class PetPlanner:
         print(f"Deleted pet [{pet.id}] and removed associated tasks.")
 
     def _list_tasks(self) -> None:
+        """Show all tasks currently stored in the system."""
         if not self.tasks:
             print("No tasks available.")
             return
