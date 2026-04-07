@@ -317,6 +317,7 @@ class PetPlanner:
         return f"Unknown({pet_id})"
 
     def _select_pet(self, action: str) -> Optional[Pet]:
+        """Prompt the user to select a pet by ID for the given action."""
         self._list_pets()
         pet_id_str = input(f"Enter pet ID to {action}: ").strip()
         if not pet_id_str.isdigit():
