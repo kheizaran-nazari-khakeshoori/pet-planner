@@ -331,6 +331,7 @@ class PetPlanner:
         return None
 
     def _select_task(self, action: str) -> Optional[Task]:
+        """Prompt the user to select a task by ID for the given action."""
         self._list_tasks()
         task_id_str = input(f"Enter task ID to {action}: ").strip()
         if not task_id_str.isdigit():
