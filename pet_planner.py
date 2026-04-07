@@ -310,6 +310,7 @@ class PetPlanner:
         return False
 
     def _get_pet_name(self, pet_id: int) -> str:
+        """Return the pet name for the given pet ID."""
         for pet in self.pets:
             if pet.id == pet_id:
                 return pet.name
