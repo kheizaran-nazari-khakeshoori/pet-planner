@@ -355,6 +355,7 @@ class PetPlanner:
             return None
 
     def _time_to_string(self, value: Optional[time]) -> Optional[str]:
+        """Convert a time object into an HH:MM string for database storage."""
         return value.strftime("%H:%M") if value else None
 
 if __name__ == "__main__":
