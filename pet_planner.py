@@ -305,9 +305,47 @@ class PetPlanner:
         """Determine whether a task should appear in today's list."""
         if task.status != "pending":
             return False
-        if task.frequency in {"daily", "weekly", "custom", "once"}:
+
+        frequency = task.frequency.strip().lower()
+        if frequency == "daily":
             return True
-        return False
+
+        if frequency == "weekly":
+            return task.created_at.weekday() == datetime.now().weekday()
+
+        if frequency.startswith("custom:"):
+            return self._is_custom_due_today(frequency)
+
+        return frequency == "once"
+
+    def _is_custom_due_today(self, frequency: str) -> bool:
+        """Check custom frequency strings like custom:Mon,Wed for today's schedule."""
+        _, spec = frequency.split(":", 1)
+        days = [token.strip().lower() for token in spec.split(",") if token.strip()]
+        today_name = datetime.now().strftime("%A").lower()
+        normalized_days = {self._normalize_day_name(day) for day in days}
+        return today_name in normalized_days
+
+    def _normalize_day_name(self, day: str) -> str:
+        """Normalize day abbreviations and names to a full weekday name."""
+        mapping = {
+            "mon": "monday",
+            "tue": "tuesday",
+            "wed": "wednesday",
+            "thu": "thursday",
+            "thur": "thursday",
+            "fri": "friday",
+            "sat": "saturday",
+            "sun": "sunday",
+            "monday": "monday",
+            "tuesday": "tuesday",
+            "wednesday": "wednesday",
+            "thursday": "thursday",
+            "friday": "friday",
+            "saturday": "saturday",
+            "sunday": "sunday",
+        }
+        return mapping.get(day[:3].lower(), day)
 
     def _get_pet_name(self, pet_id: int) -> str:
         """Return the pet name for the given pet ID."""
