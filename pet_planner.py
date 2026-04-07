@@ -345,6 +345,7 @@ class PetPlanner:
         return None
 
     def _parse_time(self, value: Optional[str]) -> Optional[time]:
+        """Parse a string into a time object, or return None if invalid."""
         if not value:
             return None
         try:
