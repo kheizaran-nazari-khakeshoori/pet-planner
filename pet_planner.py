@@ -302,6 +302,7 @@ class PetPlanner:
             )
 
     def _is_task_due_today(self, task: Task) -> bool:
+        """Determine whether a task should appear in today's list."""
         if task.status != "pending":
             return False
         if task.frequency in {"daily", "weekly", "custom", "once"}:
