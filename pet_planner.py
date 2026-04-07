@@ -288,6 +288,7 @@ class PetPlanner:
         print(f"Task [{task.id}] {task.title} marked as completed.")
 
     def _list_today_tasks(self) -> None:
+        """Show pending tasks that are due today."""
         today_tasks = [task for task in self.tasks if self._is_task_due_today(task)]
         if not today_tasks:
             print("No tasks due today.")
