@@ -14,6 +14,7 @@ app = Flask(__name__)
 def get_db() -> sqlite3.Connection:
     """Return the database connection for the current request."""
     if "db" not in g:
+        # Open a new SQLite connection and store it in the Flask context.
         g.db = sqlite3.connect(DB_FILE)
         g.db.row_factory = sqlite3.Row
     return g.db
