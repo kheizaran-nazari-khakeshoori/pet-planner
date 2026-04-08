@@ -36,6 +36,7 @@ def index() -> str:
     tasks = db.execute(
         "SELECT id, pet_id, title, description, due_time, frequency, status FROM tasks"
     ).fetchall()
+    # Render the template with the pet and task data from the database.
     return render_template("index.html", pets=pets, tasks=tasks)
 
 
