@@ -41,4 +41,5 @@ def index() -> str:
 
 
 if __name__ == "__main__":
+    # Run the Flask development server when executed directly.
     app.run(debug=True)
