@@ -22,6 +22,7 @@ def get_db() -> sqlite3.Connection:
 
 @app.teardown_appcontext
 def close_db(exception: Exception | None) -> None:
+    """Close the database connection at the end of the request."""
     db = g.pop("db", None)
     if db is not None:
         db.close()
