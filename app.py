@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime
 from flask import Flask, g, render_template
 
+# File name of the SQLite database used by this application.
 DB_FILE = "pet_planner.db"
 
 app = Flask(__name__)
