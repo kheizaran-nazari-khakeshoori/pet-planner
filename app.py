@@ -30,6 +30,7 @@ def close_db(exception: Exception | None) -> None:
 
 @app.route("/")
 def index() -> str:
+    """Render the main dashboard with pets and tasks."""
     db = get_db()
     pets = db.execute("SELECT id, name, type, age FROM pets").fetchall()
     tasks = db.execute(
