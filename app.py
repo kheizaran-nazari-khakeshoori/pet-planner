@@ -7,6 +7,7 @@ from flask import Flask, g, render_template
 # File name of the SQLite database used by this application.
 DB_FILE = "pet_planner.db"
 
+# Create the Flask application instance.
 app = Flask(__name__)
 
 
