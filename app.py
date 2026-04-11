@@ -20,6 +20,28 @@ def get_db() -> sqlite3.Connection:
     return g.db
 
 
+def _task_due_today(task: sqlite3.Row) -> bool:
+    """Return True when a task should appear in today's overview."""
+    frequency = task["frequency"].strip().lower()
+    if frequency == "daily":
+        return True
+    if frequency == "once":
+        return task["status"] == "pending"
+    if frequency == "weekly":
+        created_at = task.get("created_at")
+        if created_at:
+            weekday = datetime.fromisoformat(created_at).weekday()
+            return weekday == datetime.now().weekday()
+        return False
+    if frequency.startswith("custom:"):
+        _, spec = frequency.split(":", 1)
+        days = [token.strip().lower() for token in spec.split(",") if token.strip()]
+        today_name = datetime.now().strftime("%A").lower()
+        normalized_days = {day[:3] for day in days}
+        return today_name[:3] in normalized_days
+    return False
+
+
 @app.teardown_appcontext
 def close_db(exception: Exception | None) -> None:
     """Close the database connection at the end of the request."""
