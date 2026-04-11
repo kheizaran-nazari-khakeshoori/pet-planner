@@ -56,10 +56,21 @@ def index() -> str:
     db = get_db()
     pets = db.execute("SELECT id, name, type, age FROM pets").fetchall()
     tasks = db.execute(
-        "SELECT id, pet_id, title, description, due_time, frequency, status FROM tasks"
+        "SELECT id, pet_id, title, description, due_time, frequency, status, created_at FROM tasks"
     ).fetchall()
     # Render the template with the pet and task data from the database.
     return render_template("index.html", pets=pets, tasks=tasks)
+
+
+@app.route("/today")
+def today() -> str:
+    """Render the page showing tasks due today."""
+    db = get_db()
+    tasks = db.execute(
+        "SELECT id, pet_id, title, description, due_time, frequency, status, created_at FROM tasks"
+    ).fetchall()
+    today_tasks = [task for task in tasks if _task_due_today(task)]
+    return render_template("today.html", tasks=today_tasks)
 
 
 if __name__ == "__main__":
