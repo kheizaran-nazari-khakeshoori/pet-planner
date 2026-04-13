@@ -253,7 +253,7 @@ class PetPlanner:
         title = self._prompt_non_empty("Task title: ")
         description = input("Task description: ").strip()
         due_time = self._prompt_time("Due time (HH:MM) optional: ")
-        frequency = input("Frequency [once/daily/weekly/custom:Mon,Tue]: ").strip() or "once"
+        frequency = self._prompt_frequency("Frequency [once/daily/weekly/custom:Mon,Tue]: ")
         created_at = datetime.now().isoformat()
         due_time_str = self._time_to_string(due_time)
         cursor = self.db.cursor()
