@@ -70,6 +70,14 @@ class PetPlanner:
         )
         self.db.commit()
 
+    def _prompt_non_empty(self, prompt: str) -> str:
+        """Prompt until the user provides a non-empty value."""
+        while True:
+            value = input(prompt).strip()
+            if value:
+                return value
+            print("This field is required. Please enter a value.")
+
     def _load_data(self) -> None:
         """Load pets and tasks from the database into memory."""
         cursor = self.db.cursor()
