@@ -89,11 +89,13 @@ class PetPlanner:
                 return parsed
             print("Please enter a valid time in HH:MM format or leave blank.")
 
-    def _prompt_frequency(self, prompt: str) -> str:
+    def _prompt_frequency(self, prompt: str, default: str = "once") -> str:
         """Prompt until a valid frequency is provided."""
         valid_simple = {"once", "daily", "weekly"}
         while True:
-            value = input(prompt).strip() or "once"
+            value = input(prompt).strip()
+            if not value:
+                return default.lower()
             normalized = value.lower()
             if normalized in valid_simple:
                 return normalized
