@@ -289,10 +289,10 @@ class PetPlanner:
             return
         task.title = input(f"New title ({task.title}): ").strip() or task.title
         task.description = input(f"New description ({task.description}): ").strip() or task.description
-        due_time_input = input("New due time (HH:MM) leave blank to keep: ").strip()
-        due_time = self._parse_time(due_time_input) if due_time_input else task.due_time
-        task.due_time = due_time
-        task.frequency = input(f"New frequency ({task.frequency}): ").strip() or task.frequency
+        task.due_time = self._prompt_time("New due time (HH:MM) leave blank to keep: ") or task.due_time
+        task.frequency = self._prompt_frequency(
+            f"New frequency ({task.frequency}): ", default=task.frequency
+        )
         cursor = self.db.cursor()
         cursor.execute(
             "UPDATE tasks SET title = ?, description = ?, due_time = ?, frequency = ? WHERE id = ?",
