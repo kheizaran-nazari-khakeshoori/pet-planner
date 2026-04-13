@@ -78,6 +78,17 @@ class PetPlanner:
                 return value
             print("This field is required. Please enter a value.")
 
+    def _prompt_time(self, prompt: str) -> Optional[time]:
+        """Prompt the user for a time value and validate the HH:MM format."""
+        while True:
+            value = input(prompt).strip()
+            if not value:
+                return None
+            parsed = self._parse_time(value)
+            if parsed is not None:
+                return parsed
+            print("Please enter a valid time in HH:MM format or leave blank.")
+
     def _load_data(self) -> None:
         """Load pets and tasks from the database into memory."""
         cursor = self.db.cursor()
