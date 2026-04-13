@@ -157,8 +157,8 @@ class PetPlanner:
 
     def _add_pet(self) -> None:
         """Prompt the user for pet details and save the new pet."""
-        name = input("Pet name: ").strip()
-        pet_type = input("Pet type: ").strip()
+        name = self._prompt_non_empty("Pet name: ")
+        pet_type = self._prompt_non_empty("Pet type: ")
         age_str = input("Pet age (optional): ").strip()
         age = int(age_str) if age_str.isdigit() else None
         cursor = self.db.cursor()
