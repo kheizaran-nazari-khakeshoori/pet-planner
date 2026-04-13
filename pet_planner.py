@@ -89,6 +89,21 @@ class PetPlanner:
                 return parsed
             print("Please enter a valid time in HH:MM format or leave blank.")
 
+    def _prompt_frequency(self, prompt: str) -> str:
+        """Prompt until a valid frequency is provided."""
+        valid_simple = {"once", "daily", "weekly"}
+        while True:
+            value = input(prompt).strip() or "once"
+            normalized = value.lower()
+            if normalized in valid_simple:
+                return normalized
+            if normalized.startswith("custom:"):
+                _, spec = normalized.split(":", 1)
+                valid_days = [token.strip() for token in spec.split(",") if token.strip()]
+                if valid_days:
+                    return normalized
+            print("Valid values are once, daily, weekly, or custom:Mon,Tue.")
+
     def _load_data(self) -> None:
         """Load pets and tasks from the database into memory."""
         cursor = self.db.cursor()
