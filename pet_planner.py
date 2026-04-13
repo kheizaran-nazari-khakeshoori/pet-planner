@@ -224,7 +224,7 @@ class PetPlanner:
         pet = self._select_pet("assign this task to")
         if pet is None:
             return
-        title = input("Task title: ").strip()
+        title = self._prompt_non_empty("Task title: ")
         description = input("Task description: ").strip()
         due_time = self._parse_time(input("Due time (HH:MM) optional: ").strip())
         frequency = input("Frequency [once/daily/weekly/custom:Mon,Tue]: ").strip() or "once"
