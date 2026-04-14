@@ -411,29 +411,35 @@ class PetPlanner:
     def _select_pet(self, action: str) -> Optional[Pet]:
         """Prompt the user to select a pet by ID for the given action."""
         self._list_pets()
-        pet_id_str = input(f"Enter pet ID to {action}: ").strip()
+        pet_id_str = input(f"Enter pet ID to {action} (blank to cancel): ").strip()
+        if not pet_id_str:
+            print("Action cancelled.")
+            return None
         if not pet_id_str.isdigit():
-            print("Invalid pet ID.")
+            print("Invalid input — please enter a numeric pet ID or leave blank to cancel.")
             return None
         pet_id = int(pet_id_str)
         for pet in self.pets:
             if pet.id == pet_id:
                 return pet
-        print("Pet not found.")
+        print(f"Pet with ID {pet_id} not found.")
         return None
 
     def _select_task(self, action: str) -> Optional[Task]:
         """Prompt the user to select a task by ID for the given action."""
         self._list_tasks()
-        task_id_str = input(f"Enter task ID to {action}: ").strip()
+        task_id_str = input(f"Enter task ID to {action} (blank to cancel): ").strip()
+        if not task_id_str:
+            print("Action cancelled.")
+            return None
         if not task_id_str.isdigit():
-            print("Invalid task ID.")
+            print("Invalid input — please enter a numeric task ID or leave blank to cancel.")
             return None
         task_id = int(task_id_str)
         for task in self.tasks:
             if task.id == task_id:
                 return task
-        print("Task not found.")
+        print(f"Task with ID {task_id} not found.")
         return None
 
     def _parse_time(self, value: Optional[str]) -> Optional[time]:
