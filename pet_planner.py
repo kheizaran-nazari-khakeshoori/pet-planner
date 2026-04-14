@@ -225,10 +225,9 @@ class PetPlanner:
         pet = self._select_pet("edit")
         if pet is None:
             return
-        pet.name = input(f"New name ({pet.name}): ").strip() or pet.name
-        pet.type = input(f"New type ({pet.type}): ").strip() or pet.type
-        age_str = input(f"New age ({pet.age if pet.age is not None else 'none'}): ").strip()
-        pet.age = int(age_str) if age_str.isdigit() else pet.age
+        pet.name = self._prompt_default("New name", pet.name)
+        pet.type = self._prompt_default("New type", pet.type)
+        pet.age = self._prompt_int_optional("New age", default=pet.age)
         cursor = self.db.cursor()
         cursor.execute(
             "UPDATE pets SET name = ?, type = ?, age = ? WHERE id = ?",
