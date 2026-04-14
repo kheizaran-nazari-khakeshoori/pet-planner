@@ -78,6 +78,25 @@ class PetPlanner:
                 return value
             print("This field is required. Please enter a value.")
 
+    def _prompt_default(self, prompt: str, default: str) -> str:
+        """Prompt the user, returning the default when input is empty."""
+        value = input(f"{prompt} [{default}]: ").strip()
+        return value if value else default
+
+    def _prompt_int_optional(self, prompt: str, default: Optional[int] = None) -> Optional[int]:
+        """Prompt the user for an optional integer; return default when empty.
+
+        Keeps prompting until a valid integer is entered or the input is left blank.
+        """
+        while True:
+            default_text = str(default) if default is not None else "none"
+            value = input(f"{prompt} ({default_text}) leave blank to keep: ").strip()
+            if not value:
+                return default
+            if value.isdigit():
+                return int(value)
+            print("Please enter a valid integer or leave blank to keep the current value.")
+
     def _prompt_time(self, prompt: str) -> Optional[time]:
         """Prompt the user for a time value and validate the HH:MM format."""
         while True:
