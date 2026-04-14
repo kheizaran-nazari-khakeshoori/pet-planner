@@ -38,6 +38,8 @@ class PetPlanner:
         self.tasks: List[Task] = []
         self.next_pet_id = 1
         self.next_task_id = 1
+        # stack of undoable actions (most recent last)
+        self._undo_stack: List[dict] = []
         self._load_data()
 
     def _ensure_db(self) -> None:
@@ -96,6 +98,13 @@ class PetPlanner:
             if value.isdigit():
                 return int(value)
             print("Please enter a valid integer or leave blank to keep the current value.")
+
+    def _push_undo(self, entry: dict) -> None:
+        """Push an undo entry describing a recent change.
+
+        Entry is an opaque dict describing how to undo an action.
+        """
+        self._undo_stack.append(entry)
 
     def _prompt_time(self, prompt: str) -> Optional[time]:
         """Prompt the user for a time value and validate the HH:MM format."""
