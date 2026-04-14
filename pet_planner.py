@@ -250,6 +250,9 @@ class PetPlanner:
         pet = self._select_pet("delete")
         if pet is None:
             return
+        # record undo information: pet and its tasks
+        associated_tasks = [task for task in self.tasks if task.pet_id == pet.id]
+        self._push_undo({"action": "delete_pet", "pet": pet, "tasks": associated_tasks})
         cursor = self.db.cursor()
         cursor.execute("DELETE FROM tasks WHERE pet_id = ?", (pet.id,))
         cursor.execute("DELETE FROM pets WHERE id = ?", (pet.id,))
@@ -333,6 +336,8 @@ class PetPlanner:
         task = self._select_task("delete")
         if task is None:
             return
+        # record undo information for this task
+        self._push_undo({"action": "delete_task", "task": task})
         cursor = self.db.cursor()
         cursor.execute("DELETE FROM tasks WHERE id = ?", (task.id,))
         self.db.commit()
