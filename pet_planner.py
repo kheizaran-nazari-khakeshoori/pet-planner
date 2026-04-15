@@ -172,7 +172,8 @@ class PetPlanner:
             print("8) Delete task")
             print("9) Mark task complete")
             print("10) List today's tasks")
-            print("11) Exit")
+            print("11) Undo last action")
+            print("12) Exit")
             choice = input("Choose an option: ").strip()
 
             if choice == "1":
@@ -196,6 +197,8 @@ class PetPlanner:
             elif choice == "10":
                 self._list_today_tasks()
             elif choice == "11":
+                self._undo_last()
+            elif choice == "12":
                 print("Goodbye!")
                 break
             else:
@@ -469,6 +472,72 @@ class PetPlanner:
     def _time_to_string(self, value: Optional[time]) -> Optional[str]:
         """Convert a time object into an HH:MM string for database storage."""
         return value.strftime("%H:%M") if value else None
+
+    def _undo_last(self) -> None:
+        """Undo the most recent undoable action (currently supports deletes)."""
+        if not self._undo_stack:
+            print("Nothing to undo.")
+            return
+        entry = self._undo_stack.pop()
+        action = entry.get("action")
+        cursor = self.db.cursor()
+
+        if action == "delete_task":
+            task: Task = entry["task"]
+            try:
+                cursor.execute(
+                    "INSERT INTO tasks (id, pet_id, title, description, due_time, frequency, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        task.id,
+                        task.pet_id,
+                        task.title,
+                        task.description,
+                        self._time_to_string(task.due_time),
+                        task.frequency,
+                        task.status,
+                        task.created_at.isoformat(),
+                    ),
+                )
+                self.db.commit()
+                self.tasks.append(task)
+                self.next_task_id = max(self.next_task_id, task.id + 1)
+                print(f"Restored task [{task.id}] {task.title}.")
+            except Exception as e:
+                print(f"Failed to restore task: {e}")
+
+        elif action == "delete_pet":
+            pet: Pet = entry["pet"]
+            tasks: List[Task] = entry.get("tasks", [])
+            try:
+                cursor.execute(
+                    "INSERT INTO pets (id, name, type, age) VALUES (?, ?, ?, ?)",
+                    (pet.id, pet.name, pet.type, pet.age),
+                )
+                for t in tasks:
+                    cursor.execute(
+                        "INSERT INTO tasks (id, pet_id, title, description, due_time, frequency, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            t.id,
+                            t.pet_id,
+                            t.title,
+                            t.description,
+                            self._time_to_string(t.due_time),
+                            t.frequency,
+                            t.status,
+                            t.created_at.isoformat(),
+                        ),
+                    )
+                self.db.commit()
+                self.pets.append(pet)
+                self.tasks.extend(tasks)
+                self.next_pet_id = max(self.next_pet_id, pet.id + 1)
+                self.next_task_id = max(self.next_task_id, max((t.id for t in tasks), default=0) + 1)
+                print(f"Restored pet [{pet.id}] {pet.name} and its {len(tasks)} task(s).")
+            except Exception as e:
+                print(f"Failed to restore pet and tasks: {e}")
+
+        else:
+            print(f"Unknown undo action: {action}")
 
 if __name__ == "__main__":
     PetPlanner().run()
