@@ -174,6 +174,7 @@ class PetPlanner:
             print("10) List today's tasks")
             print("11) Undo last action")
             print("12) Exit")
+            print("13) Filter tasks")
             choice = input("Choose an option: ").strip()
 
             if choice == "1":
@@ -201,6 +202,8 @@ class PetPlanner:
             elif choice == "12":
                 print("Goodbye!")
                 break
+            elif choice == "13":
+                self._filter_tasks()
             else:
                 print("Invalid choice. Please try again.")
 
@@ -276,6 +279,40 @@ class PetPlanner:
             print(
                 f"- [{task.id}] {task.title} for pet {pet_name} | {task.frequency} | {due_text} | {task.status}"
             )
+
+    def _filter_tasks(self) -> None:
+        """Filter tasks by pet, status, or tasks due today."""
+        print("\nFilter tasks by:")
+        print("1) Pet")
+        print("2) Status (pending/completed)")
+        print("3) Due today")
+        print("4) Cancel")
+        choice = input("Choose filter: ").strip()
+        if choice == "1":
+            pet = self._select_pet("filter tasks for")
+            if pet is None:
+                return
+            tasks = [t for t in self.tasks if t.pet_id == pet.id]
+        elif choice == "2":
+            status = input("Status [pending/completed]: ").strip().lower()
+            if not status:
+                print("Cancelled.")
+                return
+            tasks = [t for t in self.tasks if t.status == status]
+        elif choice == "3":
+            tasks = [t for t in self.tasks if self._is_task_due_today(t)]
+        else:
+            print("Cancelled.")
+            return
+
+        if not tasks:
+            print("No tasks match that filter.")
+            return
+        print("\nFiltered Tasks:")
+        for task in tasks:
+            due_text = task.due_time.strftime("%H:%M") if task.due_time else "No due time"
+            pet_name = self._get_pet_name(task.pet_id)
+            print(f"- [{task.id}] {task.title} for pet {pet_name} | {task.frequency} | {due_text} | {task.status}")
 
     def _add_task(self) -> None:
         """Prompt the user for task details and save the new task."""
