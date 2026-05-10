@@ -106,6 +106,16 @@ class PetPlanner:
         """
         self._undo_stack.append(entry)
 
+    def _confirm(self, prompt: str) -> bool:
+        """Ask the user to confirm (y/n). Returns True for yes."""
+        while True:
+            ans = input(f"{prompt} [y/N]: ").strip().lower()
+            if ans in ("y", "yes"):
+                return True
+            if ans in ("n", "no", ""):
+                return False
+            print("Please answer 'y' or 'n'.")
+
     def _prompt_time(self, prompt: str) -> Optional[time]:
         """Prompt the user for a time value and validate the HH:MM format."""
         while True:
