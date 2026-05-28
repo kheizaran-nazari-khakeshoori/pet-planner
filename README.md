@@ -54,3 +54,13 @@ The web UI allows you to manage pets and tasks from the browser. The core planne
 
 - Data is persisted in `pet_planner.db`.
 - The current implementation focuses on essential pet task management with straightforward workflow and scheduling.
+
+Contributing
+-----------
+
+Contributions are welcome. Please open issues for bugs or feature requests, and send pull requests for proposed changes. Run tests with `pytest` before submitting.
+
+License
+-------
+
+This project is provided under the MIT License. See LICENSE for details.
