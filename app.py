@@ -58,8 +58,10 @@ def index() -> str:
     tasks = db.execute(
         "SELECT id, pet_id, title, description, due_time, frequency, status, created_at FROM tasks"
     ).fetchall()
-    # Render the template with the pet and task data from the database.
-    return render_template("index.html", pets=pets, tasks=tasks)
+    # Provide counts for the UI and render the template with the pet and task data.
+    pets_count = len(pets)
+    tasks_count = len(tasks)
+    return render_template("index.html", pets=pets, tasks=tasks, pets_count=pets_count, tasks_count=tasks_count)
 
 
 @app.route("/today")
