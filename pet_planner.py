@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Pet Planner CLI application with SQLite persistence."""
 from __future__ import annotations
+import logging
 import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime, time
 from typing import List, Optional
+
+# Basic logging for warnings and debugging
+logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
 
 DB_FILE = "pet_planner.db"
 
@@ -463,7 +467,7 @@ class PetPlanner:
             "saturday": "saturday",
             "sunday": "sunday",
         }
-        return mapping.get(day[:3].lower(), day)
+        return mapping.get(day[:3].lower(), day.lower())
 
     def _get_pet_name(self, pet_id: int) -> str:
         """Return the pet name for the given pet ID."""
@@ -513,7 +517,7 @@ class PetPlanner:
         try:
             return datetime.strptime(value, "%H:%M").time()
         except ValueError:
-            print("Invalid time format. Use HH:MM.")
+            logging.warning("Invalid time format. Use HH:MM: %s", value)
             return None
 
     def _time_to_string(self, value: Optional[time]) -> Optional[str]:
